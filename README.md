@@ -73,8 +73,3 @@ Pour initialiser un dépôt Git et publier ce projet sur GitHub, suivez ces éta
 - ****  
 - **Année académique** : 2024–2025  
 - **Classe** : DIC2 Génie Informatique — Tronc Commun
-
----
-
-## Remerciements
-Merci à notre professeur, **Dr Ibrahima Fall**, pour son encadrement et ses conseils tout au long de ce projet.
