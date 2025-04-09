@@ -1,0 +1,1165 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+
+
+\lstset{
+    language=C,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1,
+    numbersep=10pt,
+    frame=single,
+    breaklines=true,
+    captionpos=b
+}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    {\Large\bfseries Travaux Dirigés N°2 \\[0.5cm]}
+    {\LARGE\bfseries Algorithmique et Programmation Avancées\\[1cm]}
+    
+    \vfill
+    
+    \begin{flushleft}
+    \textbf{Module :} Algorithmique et Programmation Avancées\\[0.3cm]
+        \textbf{Professeur :} Dr Ibrahima Fall\\[0.3cm]
+        \textbf{Classe :} DIC2 Génie Informatique — Tronc Commun\\[0.3cm]
+        \textbf{Année académique :} 2024–2025
+    \end{flushleft}
+    
+    \vfill
+    
+    \begin{flushright}
+        \textbf{Présenté par :}\\
+        — Mariama BALDE\\
+        — Mouhamed DIAGNE\\
+        — Hanna SOW\\
+        — Assane MBENGUE\\
+        — Tening SENE
+    \end{flushright}
+    
+    \vfill
+
+    \vspace*{1cm}
+\end{titlepage}
+
+
+
+
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+Ce TD regroupe 8 exercices réalisés en langage C, illustrant des concepts fondamentaux de l'algorithmique et de la programmation avancée : listes chaînées, vecteurs creux, arbres binaires, etc.  
+Le but est de renforcer la compréhension de ces structures de données à travers leur implémentation concrète.
+
+\section{Structure du projet}
+L'organisation du projet est la suivante :
+\begin{itemize}
+    \item \texttt{src/} : Contient les fichiers source (\texttt{.c} et \texttt{.h}).
+    \item \texttt{Makefile} : Automatisation de la compilation.
+    \item \texttt{rapport/} : Contient ce rapport rédigé en \LaTeX.
+    \item \texttt{README.md} : Documentation du projet et instructions d’utilisation.
+\end{itemize}
+
+\section{Description des exercices}
+
+\subsection{Exercice 1 : Listes chaînées}
+Cet exercice consiste à manipuler une liste chaînée de mots. Chaque nœud contient un mot (chaîne de caractères) et un pointeur vers le nœud suivant.
+
+La structure utilisée est définie dans le fichier \texttt{exercice1.h} :
+
+\begin{lstlisting}[language=C, caption={Structure de la liste chaînée}]
+typedef struct ex1_maillon {
+    char *mot;
+    struct ex1_maillon *suiv;
+} EX1_MAILLON, *EX1_PTR;
+\end{lstlisting}
+
+Voici une fonction qui ajoute un mot en début de liste :
+
+\begin{lstlisting}[language=C, caption={Ajout d’un élément en tête de liste}]
+EX1_PTR ex1_ajoute_debut(char *mot, EX1_PTR L) {
+    EX1_PTR nouv = (EX1_PTR)malloc(sizeof(EX1_MAILLON)); // Alloue un nouveau maillon
+    if (!nouv) { // Verifie si l'allocation a echoue
+        printf("Erreur allocation mémoire.\n");
+        return L; // Retourne la liste inchangee en cas d'erreur
+    }
+    nouv->mot = strdup(mot); // Copie le mot dans le nouveau maillon
+    nouv->suiv = L; // Pointe vers l'ancien debut de la liste
+    return nouv; // Retourne le nouveau début de la liste
+}
+\end{lstlisting}
+
+Les autres fonctionnalités incluent :
+\begin{itemize}
+    \item Ajout d’un mot à la fin,
+    \item Suppression d’un mot donné,
+    \item Affichage des \texttt{n} premiers mots,
+    \item Suppression des doublons dans une liste triée,
+    \item Affichage de toute la liste.
+\end{itemize}
+
+L’exécution de l’exercice se fait via la fonction \texttt{exercice1()}, définie dans le fichier source principal.
+
+
+\subsection{Exercice 2 : Listes chaînées bidirectionnelles}
+
+Dans cet exercice, nous avons implémenté une \textbf{liste doublement chaînée} permettant d'ajouter ou de supprimer des mots aussi bien au début qu'à la fin de la liste. Cette structure est utile pour une navigation fluide dans les deux directions.
+
+La structure utilisée est définie dans le fichier \texttt{exercice2.h} :
+
+\begin{lstlisting}[language=C, caption={Structure d'un maillon de liste doublement chaînée}]
+typedef struct ex2_Maillon {
+    char *info;
+    struct ex2_Maillon *suivant;
+    struct ex2_Maillon *precedent;
+} EX2_Maillon;
+\end{lstlisting}
+
+Nous utilisons deux pointeurs globaux pour suivre le début et la fin de la liste :
+
+\begin{lstlisting}[language=C, caption={Pointeurs globaux pour début et fin de liste}]
+EX2_Maillon *ex2_premier = NULL;
+EX2_Maillon *ex2_dernier = NULL;
+\end{lstlisting}
+
+Voici un exemple d'ajout d'un élément en début de liste :
+
+\begin{lstlisting}[language=C, caption={Ajout d'un mot en tête de la liste}]
+void ex2_ajouter_devant(char *s) {
+    EX2_Maillon *nouveau = (EX2_Maillon *)malloc(sizeof(EX2_Maillon)); // Alloue un nouveau maillon
+    if (nouveau == NULL) { // Verifie si l'allocation a echoue
+        printf("Erreur d'allocation mémoire\n");
+        return;
+    }
+
+    nouveau->info = strdup(s); // Copie la chaine `s` dans le nouveau maillon
+    nouveau->precedent = NULL; // Le nouveau maillon n'a pas de precedent
+    nouveau->suivant = ex2_premier; // Pointe vers l'ancien premier maillon
+
+    if (ex2_premier != NULL) { // Si la liste n'est pas vide
+        ex2_premier->precedent = nouveau; // L'ancien premier maillon pointe vers le nouveau
+    } else {
+        ex2_dernier = nouveau; // Si la liste était vide, le nouveau maillon devient aussi le dernier
+    }
+
+    ex2_premier = nouveau; // Met a jour le pointeur du debut de la liste
+}
+
+\end{lstlisting}
+
+La fonction suivante permet de supprimer le premier maillon contenant un mot donné :
+
+\begin{lstlisting}[language=C, caption={Suppression d'un mot dans la liste}]
+void ex2_supprimer(char *s) {
+    EX2_Maillon *courant = ex2_premier; // Pointeur pour parcourir la liste
+
+    while (courant != NULL) { // Parcourt la liste
+        if (strcmp(courant->info, s) == 0) { // Si le maillon contient la chaine `s`
+            if (courant->precedent != NULL) { // Si ce n'est pas le premier maillon
+                courant->precedent->suivant = courant->suivant; // Le precedent pointe vers le suivant
+            } else {
+                ex2_premier = courant->suivant; // Met a jour le debut de la liste
+            }
+
+            if (courant->suivant != NULL) { // Si ce n'est pas le dernier maillon
+                courant->suivant->precedent = courant->precedent; // Le suivant pointe vers le precedent
+            } else {
+                ex2_dernier = courant->precedent; // Met a jour la fin de la liste
+            }
+
+            free(courant->info); // Libere la memoire de la chaine
+            free(courant); // Libere la memoire du maillon
+            return; // Quitte la fonction apres avoir supprime le maillon
+        }
+        courant = courant->suivant; // Passe au maillon suivant
+    }
+}
+\end{lstlisting}
+
+Un affichage simple permet de visualiser la liste :
+
+\begin{lstlisting}[language=C, caption={Affichage de la liste}]
+void ex2_afficher_liste() {
+    EX2_Maillon *courant = ex2_premier; // Pointeur pour parcourir la liste
+    printf("Liste : ");
+    while (courant != NULL) { // Parcourt la liste
+        printf("[%s] ", courant->info); // Affiche la chaine contenue dans le maillon
+        courant = courant->suivant; // Passe au maillon suivant
+    }
+    printf("\n"); // Ajoute une nouvelle ligne apres l'affichage
+}
+\end{lstlisting}
+
+Grâce à cette implémentation, on peut manipuler efficacement la liste dans les deux sens, et gérer les opérations courantes de manière souple.
+
+
+\subsection{Exercice 3 : Listes simplement chaînées d'entiers}
+
+Cet exercice consiste à manipuler des \textbf{listes simplement chaînées} contenant des entiers. Plusieurs opérations sont proposées : création, comparaison, concaténation et affichage.
+
+La structure de base est définie dans \texttt{exercice3.h} :
+
+\begin{lstlisting}[language=C, caption={Structure d'un nœud}]
+typedef struct ex3_Node {
+    int valeur;
+    struct ex3_Node *suivant;
+} EX3_NODE, *EX3_PTR;
+\end{lstlisting}
+
+\paragraph{Création d'un nœud}  
+On crée un nœud avec une valeur et un pointeur vers le suivant :
+
+\begin{lstlisting}[language=C, caption={Création d'un nœud}]
+EX3_PTR ex3_creer_noeud(int val, EX3_PTR suiv) {
+    EX3_PTR p = (EX3_PTR)malloc(sizeof(EX3_NODE)); // Alloue un nouveau noeud
+    if (p == NULL) { // Verifie si l'allocation a echoue
+        printf("Erreur lors de l'allocation memoire\n");
+        exit(1); // Quitte le programme en cas d'erreur
+    }
+    p->valeur = val; // Initialise la valeur du noeud
+    p->suivant = suiv; // Initialise le pointeur suivant
+    return p; // Retourne le noeud cree
+}
+
+\end{lstlisting}
+
+\paragraph{Création d'une liste}  
+On demande à l'utilisateur de saisir 10 entiers pour créer une liste :
+
+\begin{lstlisting}[language=C, caption={Création d'une liste avec saisie}]
+EX3_PTR ex3_creer_liste() {
+    EX3_PTR debut = NULL, fin = NULL; // Pointeurs pour le debut et la fin de la liste
+    int val;
+    printf("Veuillez entrer 10 entiers :\n");
+    for (int i = 0; i < 10; i++) {
+        printf("Valeur %d : ", i + 1);
+        scanf("%d", &val); // Lit une valeur entiere
+        EX3_PTR nouveau = ex3_creer_noeud(val, NULL); // Cree un nouveau noeud
+        if (debut == NULL) { // Si la liste est vide
+            debut = nouveau; // Le nouveau noeud devient le debut
+            fin = nouveau; // Et aussi la fin
+        } else {
+            fin->suivant = nouveau; // Ajoute le noeud a la fin
+            fin = nouveau; // Met a jour le pointeur de fin
+        }
+    }
+    return debut; // Retourne le debut de la liste
+}
+\end{lstlisting}
+
+\paragraph{Comparaison de deux listes}  
+Cette fonction retourne vrai si deux listes contiennent les mêmes valeurs dans le même ordre :
+
+\begin{lstlisting}[language=C, caption={Comparaison de deux listes}]
+int ex3_sont_egales(EX3_PTR l1, EX3_PTR l2) {
+    while (l1 != NULL && l2 != NULL) { // Parcourt les deux listes
+        if (l1->valeur != l2->valeur) { // Si une valeur est differente
+            return 0; // Les listes ne sont pas egales
+        }
+        l1 = l1->suivant; // Passe au noeud suivant dans la premiere liste
+        l2 = l2->suivant; // Passe au noeud suivant dans la deuxieme liste
+    }
+    return (l1 == NULL && l2 == NULL); // Les listes sont egales si elles ont la meme longueur
+}
+
+\end{lstlisting}
+
+\paragraph{Concaténation de listes}  
+Deux approches sont proposées :
+
+\begin{itemize}
+  \item \textbf{Avec création d'une nouvelle liste :}
+\begin{lstlisting}[language=C, caption={Concaténation en créant une nouvelle liste}]
+EX3_PTR ex3_concatener_nouvelle(EX3_PTR l1, EX3_PTR l2) {
+    EX3_PTR nouvelle = NULL, fin = NULL; // Pointeurs pour la nouvelle liste
+
+    // Copie les éléments de la première liste
+    while (l1 != NULL) {
+        EX3_PTR copie = ex3_creer_noeud(l1->valeur, NULL); // Crée un nouveau nœud
+        if (nouvelle == NULL) { // Si la nouvelle liste est vide
+            nouvelle = copie; // Le nouveau nœud devient le début
+            fin = copie; // Et aussi la fin
+        } else {
+            fin->suivant = copie; // Ajoute le nœud à la fin
+            fin = copie; // Met a jour le pointeur de fin
+        }
+        l1 = l1->suivant; // Passe au noeud suivant
+    }
+
+    // Copie les éléments de la deuxième liste
+    while (l2 != NULL) {
+        EX3_PTR copie = ex3_creer_noeud(l2->valeur, NULL); // Crée un nouveau nœud
+        if (nouvelle == NULL) { // Si la nouvelle liste est vide
+         nouvelle = copie; // Le nouveau noeud devient le début
+            fin = copie; // Et aussi la fin
+        } else {
+            fin->suivant = copie; // Ajoute le noeud à la fin
+            fin = copie; // Met a jour le pointeur de fin
+        }
+        l2 = l2->suivant; // Passe au nœud suivant
+    }
+
+    return nouvelle; // Retourne la nouvelle liste
+}
+\end{lstlisting}
+
+  \item \textbf{Sans duplication : modification en place :}
+\begin{lstlisting}[language=C, caption={Concaténation sans nouvelle liste}]
+void ex3_concatener_inplace(EX3_PTR* l1, EX3_PTR l2) {
+    if (*l1 == NULL) { // Si la premiere liste est vide
+        *l1 = l2; // La deuxième liste devient la premiere
+    } else {
+        EX3_PTR temp = *l1; // Pointeur temporaire pour parcourir la liste
+        while (temp->suivant != NULL) { // Parcourt la liste jusqu'au dernier noeud
+            temp = temp->suivant;
+        }
+        temp->suivant = l2; // Ajoute la deuxieme liste à la fin de la premiere
+    }
+}
+\end{lstlisting}
+\end{itemize}
+
+\paragraph{Affichage de la liste}  
+Un affichage simple permet de visualiser les éléments :
+
+\begin{lstlisting}[language=C, caption={Affichage d'une liste}]
+void ex3_afficher_liste(EX3_PTR l) {
+    while (l != NULL) { // Parcourt la liste
+        printf("%d -> ", l->valeur); // Affiche la valeur du nœud
+        l = l->suivant; // Passe au noeud suivant
+    }
+    printf("NULL\n"); // Indique la fin de la liste
+}
+\end{lstlisting}
+
+Cet exercice illustre parfaitement les opérations de base sur des listes simplement chaînées : création dynamique, parcours, comparaison et concaténation.
+
+
+\subsection{Exercice 4 : Polynômes et dérivées}
+
+Dans cet exercice, nous avons représenté un \textbf{polynôme} sous forme de liste chaînée, en ne stockant que les monômes de coefficient non nul. Chaque monôme est un nœud contenant :
+\begin{itemize}
+    \item un coefficient réel \texttt{coef},
+    \item un exposant entier \texttt{exp},
+    \item un pointeur vers le monôme suivant.
+\end{itemize}
+
+\paragraph{Structure du monôme}
+
+La structure est définie dans \texttt{exercice4.h} :
+
+\begin{lstlisting}[language=C, caption={Structure d’un monôme}]
+typedef struct ex4_Monome {
+    int exp;                // Exposant
+    float coef;             // Coefficient
+    struct ex4_Monome *suivant;
+} EX4_Monome, *EX4_Poly;
+\end{lstlisting}
+
+\paragraph{Création d’un polynôme}
+
+Voici une fonction utilitaire pour créer un monôme :
+
+\begin{lstlisting}[language=C, caption={Création d’un monôme}]
+EX4_Poly ex4_creer_monome(int exp, float coef, EX4_Poly suivant) {
+    EX4_Poly m = (EX4_Poly)malloc(sizeof(EX4_Monome)); // Alloue un nouveau monome
+    if (m == NULL) { // Verifie si l'allocation a echoue
+        printf("Erreur d'allocation mémoire\n");
+        exit(1); // Quitte le programme en cas d'erreur
+    }
+    m->exp = exp; // Initialise l'exposant du monome
+    m->coef = coef; // Initialise le coefficient du monome
+    m->suivant = suivant; // Pointe vers le monome suivant
+    return m; // Retourne le monome cree
+}
+\end{lstlisting}
+
+\paragraph{Dérivation simple}
+
+Pour calculer la dérivée d’un polynôme $P(x)$, on applique la règle :  
+\[
+(ax^n)' = a \cdot n \cdot x^{n-1}
+\]
+
+\begin{lstlisting}[language=C, caption={Dérivée d’un polynôme}]
+EX4_Poly ex4_derivee(EX4_Poly p) {
+    EX4_Poly result = NULL, fin = NULL; // Pointeurs pour le résultat et la fin de la liste
+    while (p != NULL) { // Parcourt le polynome
+        if (p->exp > 0) { // Si l'exposant est superieur à 0
+            // Crée un nouveau monome pour la dérivee
+            EX4_Poly d = ex4_creer_monome(p->exp - 1, p->coef * p->exp, NULL);
+            if (result == NULL) { // Si le résultat est vide
+                result = d; // Le nouveau monome devient le premier
+            } else {
+                fin->suivant = d; // Ajoute le monome à la fin
+            }
+            fin = d; // Met a jour le pointeur de fin
+        }
+        p = p->suivant; // Passe au monome suivant
+    }
+    return result; // Retourne le polynôme derive
+}
+
+\end{lstlisting}
+
+\paragraph{Dérivée $k$-ième}
+
+On peut enchaîner la dérivation $k$ fois pour obtenir la $k$-ième dérivée :
+
+\begin{lstlisting}[language=C, caption={Dérivée k-ième}]
+EX4_Poly ex4_derivee_k(EX4_Poly p, int k) {
+    for (int i = 0; i < k && p != NULL; i++) { // Répète k fois
+        p = ex4_derivee(p); // Calcule la derivee
+    }
+    return p; // Retourne le polynôme après k derivees
+}
+\end{lstlisting}
+
+\paragraph{Affichage}
+
+Le polynôme est affiché sous forme de couples $(x^{exp}, coef)$ :
+
+\begin{lstlisting}[language=C, caption={Affichage du polynôme}]
+void ex4_afficher_poly(EX4_Poly p) {
+    if (p == NULL) { // Si le polynome est vide
+        printf("0\n"); // Affiche 0
+        return;
+    }
+    while (p != NULL) { // Parcourt le polynome
+        printf("(x^%d, %.2f) -> ", p->exp, p->coef); // Affiche l'exposant et le coefficient
+        p = p->suivant; // Passe au monome suivant
+    }
+    printf("NULL\n"); // Indique la fin du polynome
+}
+\end{lstlisting}
+
+\paragraph{Exemple de test}
+
+La fonction \texttt{exercice4()} crée un polynôme $P(x) = 5x^4 + 3x^2 + 7$ puis affiche :
+
+\begin{itemize}
+    \item le polynôme original,
+    \item sa dérivée première $P'(x)$,
+    \item sa dérivée troisième $P^{(3)}(x)$.
+\end{itemize}
+
+\begin{lstlisting}[language=C, caption={Exemple de test}]
+void exercice4() {
+    EX4_Poly p = ex4_creer_monome(4, 5,
+                    ex4_creer_monome(2, 3,
+                    ex4_creer_monome(0, 7, NULL)));
+
+    EX4_Poly d1 = ex4_derivee(p);
+    EX4_Poly d3 = ex4_derivee_k(p, 3);
+
+    ex4_afficher_poly(p);  // P(x)
+    ex4_afficher_poly(d1); // P'(x)
+    ex4_afficher_poly(d3); // P'''(x)
+}
+\end{lstlisting}
+
+Cet exercice démontre l’utilisation efficace des listes chaînées pour représenter des expressions mathématiques comme les polynômes, et effectuer des opérations algébriques dynamiques sur celles-ci.
+
+
+\subsection{Exercice 5 : Représentation et addition de vecteurs creux}
+
+Cet exercice illustre la représentation de \textbf{vecteurs creux} à l’aide de listes chaînées. Un vecteur creux est un vecteur contenant majoritairement des zéros ; il est donc plus économique en mémoire de ne stocker que les valeurs non nulles avec leur position.
+
+\paragraph{Structure d’un élément}
+
+Chaque élément (ou maillon) représente une valeur non nulle du vecteur avec sa position d’origine :
+
+\begin{lstlisting}[language=C, caption={Structure d’un vecteur creux}]
+typedef struct ex5_Element {
+    int pos;                  // Position dans le vecteur original
+    float val;                // Valeur non nulle
+    struct ex5_Element *suivant;
+} EX5_MAILLON, *EX5_PTR;
+\end{lstlisting}
+
+\paragraph{Création d’un élément}
+
+On peut créer un nouveau maillon avec la fonction suivante :
+
+\begin{lstlisting}[language=C, caption={Création d’un maillon}]
+EX5_PTR ex5_creer_element(int position, float valeur, EX5_PTR next) {
+    EX5_PTR nouveau = (EX5_PTR)malloc(sizeof(EX5_MAILLON)); // Alloue un nouveau maillon
+    if (nouveau == NULL) { // Verifie si l'allocation a échoué
+        printf("Erreur : memoire insuffisante.\n");
+        exit(1); // Quitte le programme en cas d'erreur
+    }
+    nouveau->pos = position; // Initialise la position de l'élément
+    nouveau->val = valeur; // Initialise la valeur de l'element
+    nouveau->suivant = next; // Pointe vers le maillon suivant
+    return nouveau; // Retourne le maillon cree
+}
+\end{lstlisting}
+
+\paragraph{Conversion d’un tableau en vecteur creux}
+
+On peut transformer un tableau classique en vecteur creux, en ne conservant que les éléments non nuls :
+
+\begin{lstlisting}[language=C, caption={Conversion en vecteur creux}]
+EX5_PTR ex5_generer_vecteur_creux(float tab[], int taille) {
+    EX5_PTR tete = NULL; // Pointeur pour le début de la liste
+    EX5_PTR courant = NULL; // Pointeur pour parcourir la liste
+
+    for (int i = 0; i < taille; i++) { // Parcourt le tableau
+        if (tab[i] != 0) { // Si l'element n'est pas nul
+            EX5_PTR elem = ex5_creer_element(i, tab[i], NULL); // Crée un nouveau maillon
+            if (tete == NULL) { // Si la liste est vide
+                tete = elem; // Le nouveau maillon devient le début
+            } else {
+                courant->suivant = elem; // Ajoute le maillon à la fin
+            }
+            courant = elem; // Met a jour le pointeur courant
+        }
+    }
+    return tete; // Retourne le début de la liste
+}
+\end{lstlisting}
+
+\paragraph{Addition de deux vecteurs creux}
+
+Pour additionner deux vecteurs creux, on fusionne les listes chaînées tout en additionnant les éléments ayant la même position :
+
+\begin{lstlisting}[language=C, caption={Addition de deux vecteurs creux}]
+EX5_PTR ex5_addition_vecteurs(EX5_PTR v1, EX5_PTR v2) {
+    EX5_PTR resultat = NULL; // Pointeur pour le début du résultat
+    EX5_PTR* curseur = &resultat; // Pointeur pour ajouter des elements au résultat
+
+    while (v1 || v2) { // Parcourt les deux vecteurs
+        int indice;
+        float somme_val;
+
+        if (!v2 || (v1 && v1->pos < v2->pos)) { // Si v1 a un indice plus petit
+            indice = v1->pos;
+            somme_val = v1->val;
+            v1 = v1->suivant; // Passe au maillon suivant de v1
+        } else if (!v1 || (v2 && v2->pos < v1->pos)) { // Si v2 a un indice plus petit
+            indice = v2->pos;
+            somme_val = v2->val;
+            v2 = v2->suivant; // Passe au maillon suivant de v2
+        } else { // Si les deux indices sont egaux
+            indice = v1->pos;
+            somme_val = v1->val + v2->val; // Additionne les valeurs
+            v1 = v1->suivant; // Passe au maillon suivant de v1
+            v2 = v2->suivant; // Passe au maillon suivant de v2
+        }
+         if (somme_val != 0) { // Si la somme n'est pas nulle
+            *curseur = ex5_creer_element(indice, somme_val, NULL); // Cree un nouveau maillon
+            curseur = &((*curseur)->suivant); // Passe au maillon suivant du résultat
+        }
+    }
+
+    return resultat; // Retourne le vecteur résultant
+}
+\end{lstlisting}
+
+\paragraph{Affichage}
+
+La fonction d’affichage parcourt la liste et affiche les paires (position, valeur) :
+
+\begin{lstlisting}[language=C, caption={Affichage d’un vecteur creux}]
+void ex5_afficher(EX5_PTR v) {
+    while (v) { // Parcourt la liste
+        printf("(%d, %.2f) -> ", v->pos, v->val); // Affiche la position et la valeur
+        v = v->suivant; // Passe au maillon suivant
+    }
+    printf("NULL\n"); // Indique la fin de la liste
+}
+\end{lstlisting}
+
+\paragraph{Exemple de test}
+
+La fonction \texttt{exercice5()} teste la création de deux vecteurs creux à partir de tableaux, puis leur addition :
+
+\begin{lstlisting}[language=C, caption={Fonction de test}]
+void exercice5() {
+    // Exemple de tableaux représentant des vecteurs
+    float tab1[] = {0, 0, 9, 5, 0, 7, 0, 3, 0, 0}; // Vecteur A
+    float tab2[] = {0, 4, 0, 5, 0, 0, 6, 0, 0, 1}; // Vecteur B
+    int taille = 10;
+
+    // Génère les vecteurs creux à partir des tableaux
+    EX5_PTR vect1 = ex5_generer_vecteur_creux(tab1, taille);
+    EX5_PTR vect2 = ex5_generer_vecteur_creux(tab2, taille);
+
+    // Affiche les vecteurs creux
+    printf("Vecteur A : ");
+    ex5_afficher(vect1);
+    printf("Vecteur B : ");
+    ex5_afficher(vect2);
+
+    // Additionne les deux vecteurs creux
+    EX5_PTR somme = ex5_addition_vecteurs(vect1, vect2);
+    printf("Résultat (A + B) : ");
+    ex5_afficher(somme); // Affiche le resultat de l'addition
+}
+\end{lstlisting}
+
+\paragraph{Conclusion}
+
+Cette représentation est particulièrement utile dans les domaines comme le calcul scientifique ou l’intelligence artificielle, où les vecteurs et matrices creux sont très fréquents. Elle permet un gain de mémoire et une amélioration des performances en réduisant le traitement des zéros inutiles.
+
+
+\subsection{Exercice 6 : Compression d’une matrice symétrique}
+
+Dans cet exercice, on s'intéresse à la représentation compacte d’une matrice symétrique. Les matrices symétriques permettent d’optimiser l’espace mémoire en ne stockant que la moitié (inférieure ou supérieure) de la matrice, puisque $A[i][j] = A[j][i]$.
+
+\paragraph{Définition d’une matrice carrée}
+
+La matrice est définie comme un tableau 2D de taille maximale $100 \times 100$ :
+
+\begin{lstlisting}[language=C, caption={Structure d’une matrice carrée}]
+typedef struct {
+    double mat[100][100];
+} EX6_MATCARREE;
+\end{lstlisting}
+
+\paragraph{Vérification de symétrie}
+
+La fonction suivante vérifie si la matrice est symétrique :
+
+\begin{lstlisting}[language=C, caption={Verification de la symetrie}]
+bool ex6_symetrique(EX6_MATCARREE m, int n) {
+    for (int i = 0; i < n; i++) { // Parcourt les lignes
+        for (int j = 0; j < i; j++) { // Parcourt les colonnes jusqu'à la diagonale
+            if (m.mat[i][j] != m.mat[j][i]) { // Verifie la symetrie
+                return false; // Retourne faux si une asymétrie est detectee
+            }
+        }
+    }
+    return true; // Retourne vrai si la matrice est symétrique
+}
+\end{lstlisting}
+
+\paragraph{Nombre de coefficients à stocker}
+
+Le nombre de coefficients nécessaires pour stocker une matrice symétrique de taille $n$ est :
+
+\[
+\frac{n(n+1)}{2}
+\]
+
+\begin{lstlisting}[language=C, caption={Calcul du nombre de coefficients}]
+int ex6_nombre_coefficients(int n) {
+    return (n * (n + 1)) / 2;
+}
+\end{lstlisting}
+
+\paragraph{Génération de la représentation compacte}
+
+Cette fonction extrait uniquement les coefficients nécessaires à la représentation compacte :
+
+\begin{lstlisting}[language=C, caption={Représentation compacte}]
+double* ex6_symCompacte(EX6_MATCARREE m, int n) {
+    if (!ex6_symetrique(m, n)) { // Verifie si la matrice est symétrique
+        return NULL; // Retourne NULL si elle ne l'est pas
+    }
+
+    int taille = ex6_nombre_coefficients(n); // Calcule la taille du tableau compact
+    double* compacte = (double*)malloc(taille * sizeof(double)); // Alloue le tableau
+    if (compacte == NULL) { // Vérifie si l'allocation a échoué
+        printf("Erreur d'allocation memoire.\n");
+        exit(1); // Quitte le programme en cas d'erreur
+    }
+
+    int k = 0; // Indice pour remplir le tableau compact
+    for (int i = 0; i < n; i++) { // Parcourt les lignes
+        for (int j = 0; j <= i; j++) { // Parcourt les colonnes jusqu'à la diagonale
+            compacte[k++] = m.mat[i][j]; // Stocke le coefficient dans le tableau compact
+        }
+    }
+
+    return compacte; // Retourne le tableau compact
+}
+\end{lstlisting}
+
+\paragraph{Accès à un coefficient}
+
+Pour accéder à un élément $(i, j)$ dans la forme compacte, on utilise la formule suivante :
+
+\[
+\text{indice} = \frac{i(i+1)}{2} + j \quad \text{si } i \geq j
+\]
+
+Sinon, on inverse $i$ et $j$ car la matrice est symétrique.
+
+\begin{lstlisting}[language=C, caption={Accès à un coefficient}]
+double ex6_acces(double* c, int i, int j, int n) {
+    if (i < j) { // Si i < j, on échange i et j pour accéder a la partie triangulaire inférieure
+        int temp = i;
+        i = j;
+        j = temp;
+    }
+    return c[(i * (i + 1)) / 2 + j]; // Retourne le coefficient correspondant
+}
+
+\end{lstlisting}
+
+\paragraph{Affichage de la matrice}
+
+La matrice entière peut être reconstruite à l'affichage grâce à la fonction suivante :
+
+\begin{lstlisting}[language=C, caption={Affichage d’une matrice symétrique}]
+void ex6_afficher(double* c, int n) {
+    for (int i = 0; i < n; i++) { // Parcourt les lignes
+        ex6_traiterLigne(c, n, i); // Affiche la ligne i
+    }
+}
+
+\end{lstlisting}
+
+\paragraph{Exemple de test}
+
+Voici une démonstration complète sur une matrice $3 \times 3$ :
+
+\begin{lstlisting}[language=C, caption={Fonction de test}]
+void exercice6() {
+    // Exemple de matrice carree 3x3
+    EX6_MATCARREE m = {
+        .mat = {
+            {1, 2, 3}, // Ligne 1
+            {2, 4, 5}, // Ligne 2
+            {3, 5, 6}  // Ligne 3
+        }
+    };
+    int n = 3; // Taille de la matrice
+
+    // Verifie si la matrice est symetrique
+    if (ex6_symetrique(m, n)) {
+        printf("La matrice est symetrique.\n");
+
+        // Genere la representation compacte
+        double* compacte = ex6_symCompacte(m, n);
+        if (compacte != NULL) {
+            printf("Representation compacte :\n");
+            for (int i = 0; i < ex6_nombre_coefficients(n); i++) { // Affiche le tableau compact
+                printf("%.2f ", compacte[i]);
+            }
+            printf("\n");
+
+            // Affiche la matrice symetrique a partir de la representation compacte
+            printf("Matrice symétrique :\n");
+            ex6_afficher(compacte, n);
+
+            free(compacte); // Libère la memoire allouee pour le tableau compact
+        }
+    } else {
+        printf("La matrice n'est pas symetrique.\n");
+    }
+}
+\end{lstlisting}
+
+\paragraph{Conclusion}
+
+Ce type de compression est très utile en calcul scientifique et en traitement de graphes, où les matrices symétriques sont fréquentes. Il permet une réduction significative de l’espace mémoire tout en conservant un accès efficace aux données.
+
+
+\subsection{Exercice 7 : Opérations sur un arbre binaire}
+
+Dans cet exercice, on manipule une structure d’arbre binaire pour effectuer différentes opérations comme l’affichage des feuilles, le calcul du degré des nœuds, la profondeur d’un nœud, la hauteur de l’arbre, et la somme des valeurs des nœuds.
+
+\paragraph{Structure de l’arbre binaire}
+
+Chaque nœud de l’arbre est défini par une valeur entière, un pointeur vers le sous-arbre gauche et un autre vers le sous-arbre droit :
+
+\begin{lstlisting}[language=C, caption={Structure d’un nœud d’arbre}]
+typedef struct ex7_arbre_binaire {
+    int valeur;
+    struct ex7_arbre_binaire *gauche;
+    struct ex7_arbre_binaire *droite;
+} ex7_ArbreBinaire, *ex7_PointeurArbre;
+\end{lstlisting}
+
+\paragraph{Affichage des feuilles}
+
+Une feuille est un nœud sans enfant. Cette fonction affiche toutes les feuilles de l’arbre :
+
+\begin{lstlisting}[language=C, caption={Affichage des feuilles}]
+void ex7_afficher_feuilles(ex7_PointeurArbre arbre) {
+    if (arbre != NULL) { // Si l'arbre n'est pas vide
+        if (arbre->gauche == NULL && arbre->droite == NULL) { // Si le noeud est une feuille
+            printf("%d ", arbre->valeur); // Affiche la valeur de la feuille
+        }
+        ex7_afficher_feuilles(arbre->gauche); // Parcourt le sous-arbre gauche
+        ex7_afficher_feuilles(arbre->droite); // Parcourt le sous-arbre droit
+    }
+}
+\end{lstlisting}
+
+\paragraph{Affichage du degré des nœuds}
+
+Le degré d’un nœud correspond au nombre de ses enfants (0, 1 ou 2) :
+
+\begin{lstlisting}[language=C, caption={Degré des nœuds}]
+void ex7_afficher_degre(ex7_PointeurArbre arbre) {
+    if (arbre != NULL) { // Si l'arbre n'est pas vide
+        int degre = 0;
+        if (arbre->gauche != NULL) degre++; // Incrémente si le sous-arbre gauche existe
+        if (arbre->droite != NULL) degre++; // Incrémente si le sous-arbre droit existe
+        printf("Noeud %d : Degré %d\n", arbre->valeur, degre); // Affiche le degré du nœud
+        ex7_afficher_degre(arbre->gauche); // Parcourt le sous-arbre gauche
+        ex7_afficher_degre(arbre->droite); // Parcourt le sous-arbre droit
+    }
+}
+
+\end{lstlisting}
+
+\paragraph{Profondeur d’un nœud donné}
+
+La profondeur d’un nœud est la distance (en nombre de niveaux) qui le sépare de la racine :
+
+\begin{lstlisting}[language=C, caption={Recherche de la profondeur}]
+void ex7_trouver_profondeur(ex7_PointeurArbre arbre, int x, int niveau) {
+    if (arbre == NULL) return; // Si l'arbre est vide, retourne
+
+    if (arbre->valeur == x) { // Si le noeud courant contient la valeur recherchee
+        printf("Profondeur du nœud %d : %d\n", x, niveau); // Affiche la profondeur
+        return;
+    }
+
+    // Parcourt les sous-arbres gauche et droit en augmentant le niveau
+    ex7_trouver_profondeur(arbre->gauche, x, niveau + 1);
+    ex7_trouver_profondeur(arbre->droite, x, niveau + 1);
+}
+\end{lstlisting}
+
+\paragraph{Hauteur de l’arbre}
+
+La hauteur de l’arbre correspond à la longueur du plus long chemin de la racine à une feuille :
+
+\begin{lstlisting}[language=C, caption={Calcul de la hauteur}]
+int ex7_calculer_hauteur(ex7_PointeurArbre arbre) {
+    if (arbre == NULL) return -1; // Si l'arbre est vide, retourne -1
+
+    // Calcule la hauteur des sous-arbres gauche et droit
+    int hg = ex7_calculer_hauteur(arbre->gauche);
+    int hd = ex7_calculer_hauteur(arbre->droite);
+
+    // Retourne la hauteur maximale entre les deux sous-arbres, plus 1
+    return 1 + (hg > hd ? hg : hd);
+}
+\end{lstlisting}
+
+\paragraph{Somme des nœuds}
+
+Cette fonction retourne la somme des valeurs entières de tous les nœuds de l’arbre :
+
+\begin{lstlisting}[language=C, caption={Somme des valeurs}]
+int ex7_somme_noeuds(ex7_PointeurArbre arbre) {
+    if (arbre == NULL) return 0; // Si l'arbre est vide, retourne 0
+    // Retourne la somme de la valeur du noeud courant et des sous-arbres gauche et droit
+    return arbre->valeur + ex7_somme_noeuds(arbre->gauche) + ex7_somme_noeuds(arbre->droite);
+}
+
+\end{lstlisting}
+
+\paragraph{Fonction principale de test}
+
+L’arbre utilisé pour les tests est le suivant :
+
+\[
+\begin{array}{c}
+      10 \\
+     /  \\
+    5    15 \\
+        /  \backslash \\
+       12   20
+\end{array}
+\]
+
+\begin{lstlisting}[language=C, caption={Programme principal}]
+void exercice7() {
+    ex7_PointeurArbre arbre = malloc(sizeof(ex7_ArbreBinaire));
+    arbre->valeur = 10;
+
+    arbre->gauche = malloc(sizeof(ex7_ArbreBinaire));
+    arbre->gauche->valeur = 5;
+    arbre->gauche->gauche = NULL;
+    arbre->gauche->droite = NULL;
+
+    arbre->droite = malloc(sizeof(ex7_ArbreBinaire));
+    arbre->droite->valeur = 15;
+
+    arbre->droite->gauche = malloc(sizeof(ex7_ArbreBinaire));
+    arbre->droite->gauche->valeur = 12;
+    arbre->droite->gauche->gauche = NULL;
+    arbre->droite->gauche->droite = NULL;
+
+    arbre->droite->droite = malloc(sizeof(ex7_ArbreBinaire));
+    arbre->droite->droite->valeur = 20;
+    arbre->droite->droite->gauche = NULL;
+    arbre->droite->droite->droite = NULL;
+
+    printf("Feuilles de l'arbre : ");
+    ex7_afficher_feuilles(arbre);
+
+    printf("\n\nDegré des nœuds :\n");
+    ex7_afficher_degre(arbre);
+
+    printf("\nProfondeur du nœud 12 : ");
+    ex7_trouver_profondeur(arbre, 12, 0);
+
+    printf("\nHauteur de l'arbre : %d\n", ex7_calculer_hauteur(arbre));
+    printf("\nSomme des nœuds de l'arbre : %d\n", ex7_somme_noeuds(arbre));
+}
+\end{lstlisting}
+
+\paragraph{Conclusion}
+
+Cet exercice introduit les bases de la manipulation d’un arbre binaire, utile dans de nombreux algorithmes (recherche, tri, indexation). Les fonctions développées permettent une exploration complète de l’arbre.
+
+
+
+\subsection{Exercice 8 : Index de noms propres dans un ABR avec LCB}
+
+{Structures de données utilisées}
+
+\begin{itemize}
+    \item \textbf{Liste Chaînée Bidirectionnelle (LCB)} : utilisée pour stocker les numéros de pages.
+    \item \textbf{Arbre Binaire de Recherche (ABR)} : chaque nœud représente un nom propre associé à une LCB de pages.
+\end{itemize}
+
+\begin{lstlisting}[language=C, caption={Structures utilisées}]
+typedef struct ex8_maillon {
+    int numero;
+    struct ex8_maillon *suiv, *prec;
+} EX8_MAILLON, *EX8_PTR;
+
+typedef struct ex8_lcb {
+    EX8_PTR tete, queue;
+} EX8_LCB;
+
+typedef struct ex8_abr {
+    char nom[50];
+    EX8_LCB pages;
+    struct ex8_abr *gauche, *droite;
+} EX8_ABR, *EX8_PABR;
+\end{lstlisting}
+
+\subsection*{Fonctions implémentées}
+
+\begin{enumerate}
+    \item \textbf{Ajout d'un numéro à une LCB} :
+    \begin{itemize}
+        \item Insère un numéro dans l'ordre croissant sans doublon.
+        \item Met à jour les pointeurs doublement chaînés.
+    \end{itemize}
+
+\begin{lstlisting}[language=C, caption={Ajout d'un numéro}]
+// Cette fonction insère un numéro de page dans une liste chaînée bidirectionnelle triée.
+EX8_LCB ex8_ajout_numero(int num, EX8_LCB numeros) {
+    EX8_PTR nouveau = (EX8_PTR)malloc(sizeof(EX8_MAILLON)); // Alloue un nouveau maillon
+    if (!nouveau) { // Vérifie si l'allocation a échoué
+        printf("Erreur d'allocation mémoire.\n");
+        exit(1); // Quitte le programme en cas d'erreur
+    }
+    nouveau->numero = num; // Initialise le numéro de page
+    nouveau->suiv = NULL; // Initialise le pointeur suivant
+    nouveau->prec = NULL; // Initialise le pointeur précédent
+
+    if (numeros.tete == NULL) { // Si la liste est vide
+        numeros.tete = numeros.queue = nouveau; // Le nouveau maillon devient la tête et la queue
+        return numeros;
+    }
+
+    EX8_PTR courant = numeros.tete;
+    while (courant && courant->numero < num) // Parcourt la liste pour trouver la position d'insertion
+        courant = courant->suiv;
+
+    if (courant && courant->numero == num) { // Si le numéro existe déjà, ne rien faire
+        free(nouveau);
+        return numeros;
+        }
+
+    if (courant == numeros.tete) { // Insertion en tête
+        nouveau->suiv = numeros.tete;
+        numeros.tete->prec = nouveau;
+        numeros.tete = nouveau;
+    } else if (courant == NULL) { // Insertion en queue
+        numeros.queue->suiv = nouveau;
+        nouveau->prec = numeros.queue;
+        numeros.queue = nouveau;
+    } else { // Insertion au milieu
+        nouveau->suiv = courant;
+        nouveau->prec = courant->prec;
+        courant->prec->suiv = nouveau;
+        courant->prec = nouveau;
+    }
+
+    return numeros; // Retourne la liste mise à jour
+}
+\end{lstlisting}
+
+    \item \textbf{Ajout d'un nom propre dans l'ABR} :
+    \begin{itemize}
+        \item Crée un nouveau nœud si le nom n'existe pas.
+        \item Insère dans l'ABR selon l'ordre alphabétique.
+        \item Initialise la LCB avec les numéros fournis.
+    \end{itemize}
+
+\begin{lstlisting}[language=C]
+// Cette fonction insère un nom propre dans un ABR, avec une liste de numéros de pages associée.
+EX8_PABR ex8_ajout_nompropre(char* nom, int t[], int nombre, EX8_PABR a) {
+    if (a == NULL) { // Si l'arbre est vide
+        a = (EX8_PABR)malloc(sizeof(EX8_ABR)); // Alloue un nouveau nœud
+        if (!a) { // Vérifie si l'allocation a échoué
+            printf("Erreur d'allocation mémoire.\n");
+            exit(1); // Quitte le programme en cas d'erreur
+        }
+        strcpy(a->nom, nom); // Copie le nom dans le nœud
+        a->pages.tete = a->pages.queue = NULL; // Initialise la liste de pages
+
+        for (int i = 0; i < nombre; i++) // Ajoute les numéros de pages à la liste
+            a->pages = ex8_ajout_numero(t[i], a->pages);
+
+        a->gauche = a->droite = NULL; // Initialise les sous-arbres gauche et droit
+    } else if (strcmp(nom, a->nom) < 0) { // Si le nom est plus petit, insère dans le sous-arbre gauche
+        a->gauche = ex8_ajout_nompropre(nom, t, nombre, a->gauche);
+    } else if (strcmp(nom, a->nom) > 0) { // Si le nom est plus grand, insère dans le sous-arbre droit
+        a->droite = ex8_ajout_nompropre(nom, t, nombre, a->droite);
+    }
+
+    return a; // Retourne l'arbre mis à jour
+}
+\end{lstlisting}
+
+    \item \textbf{Suppression d'un numéro dans une LCB associée à un nom} :
+    \begin{itemize}
+        \item Recherche du nom dans l’ABR.
+        \item Suppression du numéro dans la LCB si présent.
+    \end{itemize}
+
+\begin{lstlisting}[language=C]
+// Cette fonction supprime un numéro de page d'une liste associée à un nom dans l'ABR.
+EX8_PABR ex8_supprimer_numero(char *nom, int numero, EX8_PABR a) {
+    if (a == NULL) return NULL; // Si l'arbre est vide, retourne NULL
+
+    if (strcmp(nom, a->nom) < 0) { // Si le nom est plus petit, cherche dans le sous-arbre gauche
+        a->gauche = ex8_supprimer_numero(nom, numero, a->gauche);
+    } else if (strcmp(nom, a->nom) > 0) { // Si le nom est plus grand, cherche dans le sous-arbre droit
+        a->droite = ex8_supprimer_numero(nom, numero, a->droite);
+    } else { // Si le nom correspond
+        EX8_PTR courant = a->pages.tete;
+        while (courant && courant->numero != numero) // Cherche le numéro dans la liste
+            courant = courant->suiv;
+
+        if (courant) { // Si le numéro est trouvé
+            if (courant->prec) courant->prec->suiv = courant->suiv; // Met à jour le pointeur précédent
+            if (courant->suiv) courant->suiv->prec = courant->prec; // Met à jour le pointeur suivant
+            if (courant == a->pages.tete) a->pages.tete = courant->suiv; // Met à jour la tête
+            if (courant == a->pages.queue) a->pages.queue = courant->prec; // Met à jour la queue
+            free(courant); // Libère le maillon
+        }
+    }
+
+    return a; // Retourne l'arbre mis à jour
+}
+\end{lstlisting}
+
+    \item \textbf{Affichage de l’index (infixe)} :
+    \begin{itemize}
+        \item Affiche les noms et leurs numéros de pages dans l'ordre alphabétique.
+    \end{itemize}
+
+\begin{lstlisting}[language=C]
+void ex8_afficher_index(EX8_PABR a) {
+    if (a != NULL) { // Si l'arbre n'est pas vide
+        ex8_afficher_index(a->gauche); // Parcourt le sous-arbre gauche
+        printf("%s: ", a->nom); // Affiche le nom
+        EX8_PTR courant = a->pages.tete;
+        while (courant) { // Parcourt la liste des numéros de pages
+            printf("%d ", courant->numero);
+            courant = courant->suiv;
+        }
+        printf("\n");
+        ex8_afficher_index(a->droite); // Parcourt le sous-arbre droit
+    }
+}
+\end{lstlisting}
+
+    \item \textbf{Affichage graphique de l’ABR} :
+    \begin{itemize}
+        \item Affiche la structure de l’arbre avec indentation selon la profondeur.
+    \end{itemize}
+
+\begin{lstlisting}[language=C]
+void ex8_afficher_arbre(EX8_PABR arbre, int niveau) {
+    if (arbre == NULL) return; // Si l'arbre est vide, retourne
+
+    ex8_afficher_arbre(arbre->droite, niveau + 1); // Affiche le sous-arbre droit
+
+    for (int i = 0; i < niveau; i++) // Ajoute une indentation pour représenter le niveau
+        printf("   ");
+    printf("%s\n", arbre->nom); // Affiche le nom du nœud
+
+    ex8_afficher_arbre(arbre->gauche, niveau + 1); // Affiche le sous-arbre gauche
+}
+\end{lstlisting}
+
+\end{enumerate}
+
+\subsection*{Exemple de test}
+
+\begin{lstlisting}[language=C]
+int pagesFatou[] = {110, 250, 300};
+index = ex8_ajout_nompropre("Fatou", pagesFatou, 3, index);
+...
+index = ex8_supprimer_numero("Ousseynou", 50, index);
+ex8_afficher_index(index);
+\end{lstlisting}
+
+\subsection*{Affichage graphique (exemple)}
+
+\begin{verbatim}
+      Soda
+   Pierre
+      Ousseynou
+Mamadou
+   Fatou
+\end{verbatim}
+
+\subsection*{Remarque sur les performances}
+
+\begin{itemize}
+    \item Si les noms sont insérés dans un ordre trié, l’ABR peut dégénérer en liste chaînée $\Rightarrow$ complexité en $\mathcal{O}(n)$.
+    \item \textbf{Solution} : Utiliser un arbre équilibré comme un \textbf{AVL} ou un \textbf{Red-Black Tree} pour garantir une complexité en $\mathcal{O}(\log n)$ pour les opérations de recherche, insertion et suppression.
+\end{itemize}
+
+
+\section{Compilation et exécution}
+Pour compiler l’ensemble du projet, utilisez la commande suivante dans le terminal à la racine du projet :
+\begin{lstlisting}
+make
+\end{lstlisting}
+
+Pour exécuter l’un des exercices (selon ce qui est défini dans le Makefile) :
+\begin{lstlisting}
+make run
+\end{lstlisting}
+
+\section{Conclusion}
+Ce TD nous a permis de mettre en pratique des notions essentielles de la programmation avancée en langage C. Grâce à ces exercices, nous avons pu améliorer notre maîtrise des structures de données dynamiques et de l’algorithmique, tout en adoptant une rigueur dans l'organisation de notre code et la gestion de projet.
+
+\end{document}
