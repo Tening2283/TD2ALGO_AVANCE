@@ -43,31 +43,6 @@ make clean
 ## Rapport
 Le rapport détaillant chaque exercice est disponible dans le dossier `rapport/`. Il est rédigé en LaTeX et peut être compilé pour générer un fichier PDF.
 
-## Déploiement sur GitHub
-
-Pour initialiser un dépôt Git et publier ce projet sur GitHub, suivez ces étapes :
-
-1. Initialisez un dépôt Git dans le dossier du projet :
-   ```bash
-   git init
-   ```
-2. Ajoutez tous les fichiers au suivi Git :
-   ```bash
-   git add .
-   ```
-3. Faites un premier commit :
-   ```bash
-   git commit -m "Initial commit"
-   ```
-4. Créez un nouveau dépôt sur GitHub via l’interface web.
-5. Ajoutez le dépôt distant :
-   ```bash
-   git remote add origin <URL_DU_DEPOT>
-   ```
-6. Poussez les fichiers sur GitHub :
-   ```bash
-   git push -u origin main
-   ```
 
 ## Auteur
 - ****  
